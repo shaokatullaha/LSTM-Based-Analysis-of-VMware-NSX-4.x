@@ -17,3 +17,16 @@ After achieving an initial foothold, adversaries execute lateral movement — tr
 **This project addresses the question:**
 
 *Can a Bidirectional LSTM model, trained on sequential NSX 4 East-West flow telemetry in a controlled virtualised lab, effectively detect lateral movement techniques — including Pass-the-Hash, RDP pivoting, SMB-based propagation, LDAP enumeration, and WMI remote execution — and how does its detection performance compare against a Random Forest baseline?*
+
+
+## Project Objectives
+
+- Capture **East-West VM-to-VM traffic** at the hypervisor level using VMware NSX 4 DFW and IPFIX export
+- Generate a **self-labelled dataset** of 142,001 flow records across five lateral movement technique categories
+- Engineer **five domain-specific features** from NSX IPFIX telemetry not available in any public dataset
+- Train and evaluate a **Bidirectional LSTM** (primary) and **Random Forest** (baseline) with SHAP explainability
+- Compare detection performance across **six evaluation metrics** including F1, AUC-ROC, AUC-PR, and False Positive Rate
+- Provide a fully reproducible **open-source pipeline** from IPFIX collection through to model evaluation
+
+
+## Lab Architecture
