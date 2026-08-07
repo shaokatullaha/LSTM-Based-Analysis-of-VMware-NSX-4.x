@@ -31,7 +31,12 @@ After achieving an initial foothold, adversaries execute lateral movement — tr
 
 ## Lab Architecture
 
+**Lab architecture overview**.
+
+In this lab we are using two host, each host hase 80GB of RAM, 20 CPU core and 1TB of HDD. 
 
 <p align="center">
   <img src="snap/Architecture.png" width="800">
 </p>
+
+*The Image generate by using AI*
