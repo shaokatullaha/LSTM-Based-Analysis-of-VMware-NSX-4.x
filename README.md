@@ -67,7 +67,35 @@ Host OS in VMware ESXi 8.0.3, vCenter version is 8.0.3 and NSX version is 4.2.4
 | WS01 | Windows 10 Pro | 2 | 4 GB | Employee workstation 1 — USER-TIER |
 | WS02 | Windows 10 Pro | 2 | 4 GB | Employee workstation 2 — USER-TIER |
 | KALI01 | Kali Linux 2024.x | 2 | 4 GB | Security testing VM — USER-TIER |
-| ML-TRAIN | Ubuntu 22.04 LTS | 2 | 16 GB | ML Model — MGMT-TIER |
+| ML-TRAIN | Ubuntu 22.04 LTS | 4 | 16 GB | ML Model — MGMT-TIER |
 | LOGCOL | Ubuntu 22.04 LTS | 2 | 8 GB | IPFIX log collector and dataset storage — SECURE-TIER |
 | VCSA | VMware vCenter Server Appliance | 4 | 16 GB | Management of ESXi and NSX - MGMT-TIER |
 | NSX Manager | NSX Manager Appliance | 4 | 16 GB |  NSX Management- MGMT-TIER|
+
+## Phase 1: ESXi and vCenter Setup
+
+We already have ESXi bare-metal. This phase covers verifying it is ready and deploying vCenter.
+
+**1. Verify ESXi Version**
+Log into your ESXi host directly via browser (https://YOUR-ESXI-IP) and confirm the version is ESXi 8.0. If it is ESXi 7.x, you will need to upgrade before NSX 4 can be deployed.
+
+*https://YOUR-ESXI-IP  → Login → Help → About*
+
+**2. Deploy vCenter Server Appliance (VCSA)**
+
+vCenter 8 is deployed as an OVA appliance onto  ESXi host. We manage NSX and all VMs through vCenter.
+
+- 1.	Download the VMware vCenter Server Appliance installer ISO from Broadcom support portal
+- 2.	Mount the ISO on your Windows 11 machine and run the installer:
+  *D:\vcsa-ui-installer\win32\installer.exe*
+- 3.	Choose 'Install' → Stage 1: Deploy OVF to ESXi host
+    - ESXi host IP: YOUR-ESXI-IP
+    - ESXi root credentials
+    - vCenter VM name: VCSA
+    - Deployment size: Tiny (sufficient for lab with ≤10 hosts)
+    - IP assignment: Static — assign a fixed IP on your network (e.g. 10.8.50.5)
+- 4.	Stage 2: Configure vCenter SSO
+    - SSO domain: vsphere.local
+    - SSO admin password: set a strong password — note it down
+- 5.	After deployment completes, access vCenter at:
+  *https://10.8.50.5  → Login: administrator@vsphere.local*
