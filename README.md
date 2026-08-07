@@ -98,4 +98,7 @@ vCenter 8 is deployed as an OVA appliance onto  ESXi host. We manage NSX and all
     - SSO domain: vsphere.local
     - SSO admin password: set a strong password — note it down
 - 5.	After deployment completes, access vCenter at:
+
   *https://10.8.50.5  → Login: administrator@vsphere.local*
+
+For Deploy vCenter Server follow this **[Download Dataset](https://example.com/dataset.zip)**
