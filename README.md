@@ -46,6 +46,6 @@ Host OS in VMware ESXi 8.0.3, vCenter version is 8.0.3 and NSX version is 4.2.4
 **Lab overview**
 
 <p align="center">
-  <img src="snap/lab-overview.png" width="800">
+  <img src="snap/lab-overview.PNG" width="800">
 </p>
 
