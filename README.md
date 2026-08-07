@@ -63,9 +63,11 @@ Host OS in VMware ESXi 8.0.3, vCenter version is 8.0.3 and NSX version is 4.2.4
 |---|---|---:|---:|---|
 | DC01 | Windows Server 2022 | 2 | 4 GB | Active Directory Domain Controller — SECURE-TIER |
 | WEB01 | Ubuntu 22.04 LTS | 2 | 4 GB | Apache/Nginx web server — WEB-TIER |
-| APP01 | Ubuntu 22.04 LTS | 2 | 4 GB | File server (Samba) + application server — APP-TIER |
+| APP01 | Windows Server 2022 | 2 | 4 GB | File server (Samba) + application server — APP-TIER |
 | WS01 | Windows 10 Pro | 2 | 4 GB | Employee workstation 1 — USER-TIER |
 | WS02 | Windows 10 Pro | 2 | 4 GB | Employee workstation 2 — USER-TIER |
 | KALI01 | Kali Linux 2024.x | 2 | 4 GB | Security testing VM — USER-TIER |
+| ML-TRAIN | Ubuntu 22.04 LTS | 2 | 16 GB | ML Model — MGMT-TIER |
 | LOGCOL | Ubuntu 22.04 LTS | 2 | 8 GB | IPFIX log collector and dataset storage — SECURE-TIER |
-| VCSA | VMware vCenter Server Appliance | 4 | 16 GB | Management of ESXi and NSX |
+| VCSA | VMware vCenter Server Appliance | 4 | 16 GB | Management of ESXi and NSX - MGMT-TIER |
+| NSX Manager | NSX Manager Appliance | 4 | 16 GB |  NSX Management- MGMT-TIER|
