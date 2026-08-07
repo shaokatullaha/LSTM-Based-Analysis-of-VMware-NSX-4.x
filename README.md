@@ -30,3 +30,8 @@ After achieving an initial foothold, adversaries execute lateral movement — tr
 
 
 ## Lab Architecture
+
+
+<p align="center">
+  <img src="snap/Architecture.png" width="800">
+</p>
