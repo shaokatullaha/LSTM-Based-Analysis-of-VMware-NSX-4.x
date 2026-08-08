@@ -142,3 +142,49 @@ NSX 4 is deployed as a Manager appliance and then prepared on the ESXi host. Thi
 
 For Deploy and configure NSX Manager follow this **[NSX Manager Deploy](https://github.com/shaokatullaha/deploy-vcenter-server)**
 
+
+## Phase 3: Create Each VM in vCenter
+
+Repeat this process for each VM (DC01, WEB01, APP01, WS01, WS02, KALI01, LOGCOL):
+-	In vCenter: right-click the ESXi host → New Virtual Machine
+-	Choose 'Create a new virtual machine'
+-	Set name, vCPU, RAM per the table in Section 2
+-	Network adapter: connect to the 'VM Network' for now (NSX segments added later)
+-	Add a CD/DVD drive, mount the appropriate ISO
+-	Create a 60GB thin-provisioned disk
+-	Power on and complete OS installation
+
+## Phase 4: Configure DC01 (Active Directory)
+
+DC01 must be configured first as all Windows VMs will join this domain.
+-	Open DC01 console in vCenter
+-	Set static IP: 192.168.40.2 / 255.255.255.0 / GW: 192.168.40.1
+-	Open Server Manager → Add Roles → Active Directory Domain Services
+-	Promote to Domain Controller:
+    *Domain name: shaokat.local NetBIOS: LAB Password: [your DS restore mode password]*
+-	Reboot. DC01 is now the domain controller for shaokat.local
+
+## Phase 5: Join Windows VMs to Domain
+
+On WS01 and WS02 after OS install:
+-	Set static IPs (e.g. WS01: 192.168.10.2, WS02: 192.168.10.3)
+-	Set DNS to 192.168.40.2 (DC01)
+-	System → Advanced → Computer Name → Change → Domain: shaokat.local
+-	Enter domain admin credentials when prompted
+-	Reboot
+
+## Phase 6: Configure LOGCOL (Log Collector)
+The log collector receives NSX IPFIX flow data and stores it as your ML dataset.
+-	Install Ubuntu 22.04 Server on LOGCOL
+-	Set static IP: 192.168.10.5
+-	Install required packages:
+```bash
+sudo apt update && sudo apt install -y nfdump softflowd python3 python3-pip
+pip3 install pandas scikit-learn tensorflow scapy
+```
+-	Configure nfcapd to receive IPFIX on port 4739:
+```bash
+sudo nfcapd -D -p 4739 -l /opt/flowdata/ -t 300 
+```
+ -t 300 = rotate files every 5 minutes (matches your feature window)
+
