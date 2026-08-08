@@ -176,7 +176,7 @@ On WS01 and WS02 after OS install:
 ## Phase 6: Configure LOGCOL (Log Collector)
 The log collector receives NSX IPFIX flow data and stores it as your ML dataset.
 -	Install Ubuntu 22.04 Server on LOGCOL
--	Set static IP: 192.168.10.5
+-	Set static IP: 10.8.50.10
 -	Install required packages:
 ```bash
 sudo apt update && sudo apt install -y nfdump softflowd python3 python3-pip
@@ -187,4 +187,76 @@ pip3 install pandas scikit-learn tensorflow scapy
 sudo nfcapd -D -p 4739 -l /opt/flowdata/ -t 300 
 ```
  -t 300 = rotate files every 5 minutes (matches your feature window)
+
+## Phase 7: NSX Segments and Micro segmentation Policy
+
+**Create NSX Segments (Virtual Networks)**
+NSX Segments replace traditional VLANs. Each tier gets its own segment.
+-	In NSX Manager: Networking → Segments → Add Segment
+-	Create four segments:
+
+| Segment Name     | Subnet            | VMs to Attach              | Purpose                         |
+|------------------|-------------------|----------------------------|----------------------------------|
+| **seg-user-tier**   | 192.168.10.0/24 | WS01, WS02, KALI01        | Employee + attacker network      |
+| **seg-web-tier**    | 192.168.20.0/24 | WEB01                     | Web-facing services              |
+| **seg-app-tier**    | 192.168.30.0/24 | APP01                     | Application and file services    |
+| **seg-secure-tier** | 192.168.40.0/24 | DC01              | Privileged / Domain Controller tier |
+
+- Attach each VM's network adapter to its segment: In vCenter → VM → Edit Settings → Network Adapter → select the NSX segment
+
+**Create NSX Security Groups**
+Security Groups are the building blocks of DFW policy. VMs are members of groups based on tags.
+-	NSX Manager: Inventory → Groups → Add Group
+-	Create four groups using 'Segment' membership criteria:
+  -	Group: User-Tier — Members: VMs on seg-user-tier
+  -	Group: Web-Tier — Members: VMs on seg-web-tier
+  -	Group: App-Tier — Members: VMs on seg-app-tier
+  -	Group: Secure-Tier — Members: VMs on seg-secure-tier
+
+**Configure NSX Distributed Firewall (DFW) Rules**
+
+These rules define the legitimate traffic flows that become your 'normal' baseline dataset. The DFW logs all traffic including denied packets.
+
+| # | Source Tier | Destination Tier | Service | Protocol / Ports | Action | Purpose |
+|---|-------------|------------------|---------|------------------|--------|---------|
+| **1** | User-Tier | Web-Tier | HTTP/S | TCP 80,443 | Allow | Users access web apps |
+| **2** | Web-Tier | App-Tier | Custom | TCP 8080 | Allow | Web to app backend |
+| **3** | App-Tier | Secure-Tier | LDAP | TCP 389,636 | Allow | App servers query AD |
+| **4** | User-Tier | Secure-Tier | Kerberos / DNS | TCP/UDP 88,53 | Allow | Domain auth from users |
+| **5** | Any | Any | DNS | UDP 53 | Allow | DNS resolution |
+| **6** | Secure-Tier | Any | Any | Any | Allow | DC/Log outbound |
+| **7** | Any | Any | Any | Any | Reject | Default deny-all (log) |
+
+## Phase 8: Configure NSX IPFIX Flow Export
+
+IPFIX (IP Flow Information Export) is the protocol NSX uses to send per-flow records to your log collector. This is the source of your ML training dataset
+
+**Enable IPFIX in NSX Manager**
+
+-	NSX Manager → Plan and Troubleshooting → IPFIX → IPFIX Collector → Add →IPFIX Swithch
+    -	Fill in:
+    -	Name: LOGCOL-IPFIX
+    -	IP Address: 10.8.50.10 (LOGCOL IP)
+    -	Port: 4739 (IPFIX standard port)
+<p align="center">
+  <img src="snap/IPFIX-Switch-controller.PNG" width="800">
+</p>
+
+-	NSX Manager → Plan and Troubleshooting → IPFIX → IPFIX Collector → Add →IPFIX Firewall
+    -	Fill in:
+    -	Name: LOGCOL-IPFIX
+    -	IP Address: 10.8.50.10 (LOGCOL IP)
+    -	Port: 4739 (IPFIX standard port)
+<p align="center">
+  <img src="snap/IPFIX-Firewall-controller.PNG" width="800">
+</p>
+
+- NSX Manager → Plan and Troubleshooting → IPFIX → IPFIX Collector → Add →IPFIX Firewall
+◦	Name: DFW-IPFIX-Profile
+◦	Collector: LOGCOL-IPFIX (select the profile just created)
+◦	Active Flow Export Timeout: 60 seconds
+◦	Idle Flow Export Timeout: 15 seconds
+52.	Apply the IPFIX Switch Profile to your NSX segments:
+◦	Networking → Segments → select each segment → Edit → Switch Profile Bindings → IPFIX Profile: DFW-IPFIX-Profile
+
 
