@@ -140,4 +140,5 @@ NSX 4 is deployed as a Manager appliance and then prepared on the ESXi host. Thi
 - 3.	This installs the NSX kernel modules on ESXi (requires host not in maintenance mode)
 - 4.	Wait for host status to show 'NSX Configured'
 
+For Deploy and configure NSX Manager follow this **[NSX Manager Deploy](https://github.com/shaokatullaha/deploy-vcenter-server)**
 
