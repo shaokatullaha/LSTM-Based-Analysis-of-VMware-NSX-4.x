@@ -101,4 +101,43 @@ vCenter 8 is deployed as an OVA appliance onto  ESXi host. We manage NSX and all
 
   *https://10.8.50.5  → Login: administrator@vsphere.local*
 
-For Deploy vCenter Server follow this **[Download Dataset](https://example.com/dataset.zip)**
+For Deploy vCenter Server follow this **[Deploy vCenter Server](https://github.com/shaokatullaha/deploy-vcenter-server)**
+
+
+## Phase 2: Deploy VMware NSX 4
+NSX 4 is deployed as a Manager appliance and then prepared on the ESXi host. This is the most technically complex phase
+
+**1 Download NSX 4 OVA**
+- Download NSX-T 4.x OVA from Broadcom support portal
+- Recommended version: NSX 4.2.x or latest stable
+
+**2 Deploy NSX Manager**
+- 1. In vCenter, right-click the ESXi host → Deploy OVF Template
+- 2. Select the NSX Manager OVA file
+- 3. Configure deployment:
+    -	Name: NSX-MGR
+    - Deployment size: Small (4 vCPU, 16GB RAM )
+    - Network: connect to your management network
+    -	IP: assign a static IP (e.g. 10.8.50.6)
+    -	Password: set NSX admin password
+- 4.	Power on the NSX Manager VM and wait 10–15 minutes for it to boot
+- 5.	Access NSX Manager:
+
+*https://10.8.50.6  → Login: admin / YOUR-PASSWORD*
+
+**3 Register NSX with vCenter**
+- 1.	In NSX Manager: System → Configuration → vCenter Server
+- 2.	Add vCenter:
+    - URL: https://10.8.50.5
+    - Username: administrator@vsphere.local
+    - Password: vCenter SSO password
+- 3.	Accept the certificate thumbprint
+- 4.	NSX will now see all VMs and hosts managed by vCenter
+
+**4 Prepare ESXi Host for NSX**
+- 1.	In NSX Manager: System → Fabric → Hosts
+- 2.	Select your ESXi host → Actions → Configure NSX
+- 3.	This installs the NSX kernel modules on ESXi (requires host not in maintenance mode)
+- 4.	Wait for host status to show 'NSX Configured'
+
+
